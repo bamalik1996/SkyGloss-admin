@@ -1,0 +1,49 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Layout from './components/Layout';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Users from './pages/Users';
+import ShopRequests from './pages/ShopRequests';
+import AccessCodes from './pages/AccessCodes';
+import CertificationRequests from './pages/CertificationRequests';
+
+import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import Products from './pages/Products';
+
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'distributor']} />}>
+            <Route element={<Layout children={<Dashboard />} />} path="/" />
+            <Route element={<Layout children={<Users />} />} path="/users" />
+            <Route element={<Layout children={<AccessCodes />} />} path="/access-codes" />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route element={<Layout children={<ShopRequests />} />} path="/shop-requests" />
+            <Route element={<Layout children={<Products />} />} path="/products" />
+            <Route element={<Layout children={<CertificationRequests />} />} path="/certification-requests" />
+          </Route>
+
+          <Route path="/unauthorized" element={<div className="min-h-screen flex items-center justify-center">Unauthorized Access</div>} />
+          <Route path="*" element={<div className="min-h-screen flex items-center justify-center">404 - Not Found</div>} />
+        </Routes>
+      </AuthProvider>
+    </Router>
+  );
+}
+
+// Helper to wrap Layout around pages in a cleaner way if needed, 
+// though the above is fine for this structure.
+export default App;
