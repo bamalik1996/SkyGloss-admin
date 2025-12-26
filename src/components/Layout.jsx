@@ -25,6 +25,7 @@ const Layout = ({ children }) => {
         { name: 'Product Management', icon: Package, path: '/products', roles: ['admin'] },
         { name: 'Shop Requests', icon: Store, path: '/shop-requests', roles: ['admin'] },
         { name: 'Certification Requests', icon: ShieldCheck, path: '/certification-requests', roles: ['admin'] },
+        { name: 'Order Management', icon: Package, path: '/orders', roles: ['admin'] },
         { name: 'Access Codes', icon: Key, path: '/access-codes' },
     ].filter(item => !item.roles || item.roles.includes(user?.role));
 

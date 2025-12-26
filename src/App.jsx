@@ -13,6 +13,8 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Products from './pages/Products';
+import Orders from './pages/Orders';
+import OrderDetails from './pages/OrderDetails';
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
             <Route element={<Layout children={<ShopRequests />} />} path="/shop-requests" />
             <Route element={<Layout children={<Products />} />} path="/products" />
             <Route element={<Layout children={<CertificationRequests />} />} path="/certification-requests" />
+            <Route element={<Layout children={<Orders />} />} path="/orders" />
+            <Route element={<Layout children={<OrderDetails />} />} path="/orders/:id" />
           </Route>
 
           <Route path="/unauthorized" element={<div className="min-h-screen flex items-center justify-center">Unauthorized Access</div>} />

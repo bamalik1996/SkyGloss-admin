@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
-import { Search, Filter, MoreVertical, Trash2, Edit2, Plus, X, Package, ExternalLink } from 'lucide-react';
+import { Search, Filter, MoreVertical, Trash2, Edit2, Plus, X, Package, ExternalLink, Upload, Loader2 as LoaderIcon } from 'lucide-react';
 
 const Products = () => {
     const [products, setProducts] = useState([]);
@@ -17,7 +17,7 @@ const Products = () => {
         features: [''],
         specifications: [{ label: '', value: '' }],
         sizes: [{ size: '', price: '' }],
-        status: 'active'
+        status: 'published'
     });
 
     useEffect(() => {
@@ -60,7 +60,7 @@ const Products = () => {
                 features: [''],
                 specifications: [{ label: '', value: '' }],
                 sizes: [{ size: '', price: '' }],
-                status: 'active'
+                status: 'published'
             });
         }
         setIsModalOpen(true);
@@ -134,6 +134,31 @@ const Products = () => {
         } catch (err) {
             console.error(err);
             alert('Failed to save product');
+        }
+    };
+
+    const handleImageUpload = async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        const uploadFormData = new FormData();
+        files.forEach(file => uploadFormData.append('images', file));
+
+        try {
+            setLoading(true); // Reuse loading state or add a specific one
+            const res = await api.post('/products/upload', uploadFormData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            const newUrls = res.data.urls;
+            setFormData(prev => ({
+                ...prev,
+                images: prev.images[0] === '' ? newUrls : [...prev.images, ...newUrls]
+            }));
+        } catch (err) {
+            console.error(err);
+            alert('Failed to upload images');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -241,8 +266,8 @@ const Products = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`flex items-center gap-1.5 text-sm font-medium ${product.status === 'active' ? 'text-emerald-600' : 'text-slate-400'}`}>
-                                            <span className={`w-2 h-2 rounded-full ${product.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                                        <span className={`flex items-center gap-1.5 text-sm font-medium ${product.status === 'published' ? 'text-emerald-600' : 'text-slate-400'}`}>
+                                            <span className={`w-2 h-2 rounded-full ${product.status === 'published' ? 'bg-emerald-500' : 'bg-slate-400'}`} />
                                             {product.status}
                                         </span>
                                     </td>
@@ -315,6 +340,18 @@ const Products = () => {
                                         className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20"
                                     />
                                 </div>
+                                <div className="space-y-1">
+                                    <label className="text-sm font-semibold text-slate-700">Status</label>
+                                    <select
+                                        name="status"
+                                        value={formData.status}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 appearance-none bg-white"
+                                    >
+                                        <option value="published">Published</option>
+                                        <option value="draft">Draft</option>
+                                    </select>
+                                </div>
                             </div>
 
                             <div className="space-y-1">
@@ -331,25 +368,52 @@ const Products = () => {
 
                             <div className="space-y-3">
                                 <div className="flex justify-between items-center">
-                                    <label className="text-sm font-semibold text-slate-700">Images (URLs)</label>
-                                    <button type="button" onClick={() => addArrayItem('images')} className="text-blue-600 text-sm hover:underline flex items-center gap-1">
-                                        <Plus size={14} /> Add Image
-                                    </button>
-                                </div>
-                                {formData.images.map((img, idx) => (
-                                    <div key={idx} className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            placeholder="https://..."
-                                            value={img}
-                                            onChange={(e) => handleArrayChange(idx, e.target.value, 'images')}
-                                            className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm"
-                                        />
-                                        {formData.images.length > 1 && (
-                                            <button type="button" onClick={() => removeArrayItem(idx, 'images')} className="text-red-500 p-2"><Trash2 size={16} /></button>
-                                        )}
+                                    <label className="text-sm font-semibold text-slate-700">Product Images</label>
+                                    <div className="flex gap-4">
+                                        <label className="text-blue-600 text-sm hover:underline flex items-center gap-1 cursor-pointer">
+                                            <Upload size={14} /> Upload Images
+                                            <input
+                                                type="file"
+                                                multiple
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handleImageUpload}
+                                            />
+                                        </label>
+                                        <button type="button" onClick={() => addArrayItem('images')} className="text-slate-600 text-sm hover:underline flex items-center gap-1">
+                                            <Plus size={14} /> Add URL
+                                        </button>
                                     </div>
-                                ))}
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {formData.images.map((img, idx) => (
+                                        <div key={idx} className="relative group aspect-video bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
+                                            {img ? (
+                                                <img src={img} alt="" className="w-full h-full object-contain" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                                    <Package size={24} />
+                                                </div>
+                                            )}
+                                            <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 items-center justify-center">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeArrayItem(idx, 'images')}
+                                                    className="p-2 bg-white text-red-600 rounded-lg hover:bg-red-50 shadow-lg"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                            <input
+                                                type="text"
+                                                placeholder="Image URL"
+                                                value={img}
+                                                onChange={(e) => handleArrayChange(idx, e.target.value, 'images')}
+                                                className="absolute bottom-0 left-0 right-0 px-2 py-1 text-xs bg-white/90 border-t border-slate-200 focus:outline-none"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
 
                             <div className="space-y-3">
