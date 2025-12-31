@@ -10,7 +10,8 @@ import {
     X,
     UserCircle,
     ShieldCheck,
-    Package
+    Package,
+    MessageSquare
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -27,6 +28,7 @@ const Layout = ({ children }) => {
         { name: 'Certification Requests', icon: ShieldCheck, path: '/certification-requests', roles: ['admin'] },
         { name: 'Order Management', icon: Package, path: '/orders', roles: ['admin'] },
         { name: 'Support Tickets', icon: Store, path: '/support-tickets', roles: ['admin'] },
+        { name: 'Live Chat', icon: MessageSquare, path: '/live-chat', roles: ['admin'] },
         { name: 'Access Codes', icon: Key, path: '/access-codes' },
     ].filter(item => !item.roles || item.roles.includes(user?.role));
 
