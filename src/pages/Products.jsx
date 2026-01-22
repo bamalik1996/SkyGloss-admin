@@ -17,9 +17,9 @@ const Products = () => {
         features: [''],
         specifications: [{ label: '', value: '' }],
         sizes: [{ size: '', price: '' }],
-        sizes: [{ size: '', price: '' }],
         status: 'published',
-        targetAudience: 'all'
+        targetAudience: 'all',
+        displayOrder: 0
     });
 
     useEffect(() => {
@@ -49,9 +49,9 @@ const Products = () => {
                 features: product.features || [''],
                 specifications: product.specifications || [{ label: '', value: '' }],
                 sizes: product.sizes || [{ size: '', price: '' }],
-                sizes: product.sizes || [{ size: '', price: '' }],
                 status: product.status,
-                targetAudience: product.targetAudience || 'all'
+                targetAudience: product.targetAudience || 'all',
+                displayOrder: product.displayOrder || 0
             });
         } else {
             setEditingProduct(null);
@@ -64,9 +64,9 @@ const Products = () => {
                 features: [''],
                 specifications: [{ label: '', value: '' }],
                 sizes: [{ size: '', price: '' }],
-                sizes: [{ size: '', price: '' }],
                 status: 'published',
-                targetAudience: 'all'
+                targetAudience: 'all',
+                displayOrder: 0
             });
         }
         setIsModalOpen(true);
@@ -129,10 +129,13 @@ const Products = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log('[Products] Submitting formData:', formData);
         try {
             if (editingProduct) {
+                console.log(`[Products] Patching product ${editingProduct._id}`);
                 await api.patch(`/products/${editingProduct._id}`, formData);
             } else {
+                console.log('[Products] Creating new product');
                 await api.post('/products', formData);
             }
             fetchProducts();
@@ -224,6 +227,7 @@ const Products = () => {
                                 <th className="px-6 py-4 font-semibold">Stock</th>
                                 <th className="px-6 py-4 font-semibold">Sizes / Prices</th>
                                 <th className="px-6 py-4 font-semibold">Status</th>
+                                <th className="px-6 py-4 font-semibold text-center">Order</th>
                                 <th className="px-6 py-4 font-semibold text-right">Actions</th>
                             </tr>
                         </thead>
@@ -275,6 +279,11 @@ const Products = () => {
                                         <span className={`flex items-center gap-1.5 text-sm font-medium ${product.status === 'published' ? 'text-emerald-600' : 'text-slate-400'}`}>
                                             <span className={`w-2 h-2 rounded-full ${product.status === 'published' ? 'bg-emerald-500' : 'bg-slate-400'}`} />
                                             {product.status}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                        <span className="font-mono bg-slate-100 px-2 py-1 rounded text-slate-600">
+                                            {product.displayOrder || 0}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
@@ -370,6 +379,20 @@ const Products = () => {
                                         <option value="shop">Shop Only</option>
                                         <option value="technician">Technician Only</option>
                                     </select>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-sm font-semibold text-slate-700">Display Order</label>
+                                    <input
+                                        type="number"
+                                        name="displayOrder"
+                                        value={formData.displayOrder}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value);
+                                            setFormData(prev => ({ ...prev, displayOrder: isNaN(val) ? 0 : val }));
+                                        }}
+                                        className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20"
+                                        placeholder="0"
+                                    />
                                 </div>
                             </div>
 

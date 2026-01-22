@@ -192,6 +192,18 @@ const OrderDetails = () => {
                             Customer Details
                         </h2>
                         <div className="space-y-4">
+                            {order.user && (
+                                <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 mb-4">
+                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Requested By Account</p>
+                                    <div className="flex flex-col gap-1">
+                                        <p className="text-sm font-bold text-gray-900">{order.user.firstName} {order.user.lastName}</p>
+                                        <p className="text-xs text-gray-600">{order.user.email}</p>
+                                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase w-fit mt-1 ${order.user.role === 'distributor' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-700'}`}>
+                                            Account: {order.user.role}
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
                             <div className="flex items-start gap-3">
                                 <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
                                     <User className="w-4 h-4 text-gray-500" />
@@ -212,6 +224,17 @@ const OrderDetails = () => {
                                         {order.shippingAddress?.email}
                                     </p>
                                     <p className="text-xs text-gray-500">Email Address</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <Phone className="w-4 h-4 text-gray-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-gray-900">
+                                        {order.shippingAddress?.phoneNumber || 'N/A'}
+                                    </p>
+                                    <p className="text-xs text-gray-500">Phone Number</p>
                                 </div>
                             </div>
                         </div>

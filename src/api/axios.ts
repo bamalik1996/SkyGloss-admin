@@ -1,8 +1,14 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'https://skygloss-backend-production.up.railway.app',
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001',
 });
+
+const url = api.defaults.baseURL || '';
+console.log('Admin Panel is connecting to API at:', url);
+if (url.includes('skygloss-backend-production')) {
+    console.warn('CAUTION: You are connected to the PRODUCTION backend. Changes may not take effect locally.');
+}
 
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
