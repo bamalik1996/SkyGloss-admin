@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { Search, Filter, MoreVertical, Trash2, Edit2, Plus, X, Package, ExternalLink, Upload, Loader2 as LoaderIcon } from 'lucide-react';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 
 const Products = () => {
     const [products, setProducts] = useState([]);
@@ -15,12 +17,22 @@ const Products = () => {
         stock: 0,
         images: [''],
         features: [''],
-        specifications: [{ label: '', value: '' }],
+        specifications: '',
+        technicalSpecifications: '',
         sizes: [{ size: '', price: '' }],
         status: 'published',
         targetAudience: 'all',
         displayOrder: 0
     });
+
+    // Helper to convert legacy specs array to HTML string
+    const convertSpecsToHtml = (specs) => {
+        if (Array.isArray(specs) && specs.length > 0) {
+            const listItems = specs.map(s => `<li><strong>${s.label}:</strong> ${s.value}</li>`).join('');
+            return `<ul>${listItems}</ul>`;
+        }
+        return '';
+    };
 
     useEffect(() => {
         fetchProducts();
@@ -40,6 +52,15 @@ const Products = () => {
     const handleOpenModal = (product = null) => {
         if (product) {
             setEditingProduct(product);
+            
+            // Determine initial specifications value
+            let initialSpecs = '';
+            if (typeof product.specifications === 'string') {
+                initialSpecs = product.specifications;
+            } else if (Array.isArray(product.specifications)) {
+                initialSpecs = convertSpecsToHtml(product.specifications);
+            }
+
             setFormData({
                 name: product.name,
                 description: product.description,
@@ -47,7 +68,8 @@ const Products = () => {
                 stock: product.stock || 0,
                 images: product.images || [''],
                 features: product.features || [''],
-                specifications: product.specifications || [{ label: '', value: '' }],
+                specifications: initialSpecs,
+                technicalSpecifications: product.technicalSpecifications || '',
                 sizes: product.sizes || [{ size: '', price: '' }],
                 status: product.status,
                 targetAudience: product.targetAudience || 'all',
@@ -62,13 +84,15 @@ const Products = () => {
                 stock: 0,
                 images: [''],
                 features: [''],
-                specifications: [{ label: '', value: '' }],
+                specifications: '',
+                technicalSpecifications: '',
                 sizes: [{ size: '', price: '' }],
                 status: 'published',
                 targetAudience: 'all',
                 displayOrder: 0
             });
         }
+        setIsModalOpen(true);
         setIsModalOpen(true);
     };
 
@@ -112,20 +136,7 @@ const Products = () => {
         setFormData(prev => ({ ...prev, sizes: newSizes }));
     };
 
-    const handleSpecChange = (index, field, value) => {
-        const newSpecs = [...formData.specifications];
-        newSpecs[index][field] = value;
-        setFormData(prev => ({ ...prev, specifications: newSpecs }));
-    };
 
-    const addSpecItem = () => {
-        setFormData(prev => ({ ...prev, specifications: [...prev.specifications, { label: '', value: '' }] }));
-    };
-
-    const removeSpecItem = (index) => {
-        const newSpecs = formData.specifications.filter((_, i) => i !== index);
-        setFormData(prev => ({ ...prev, specifications: newSpecs }));
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -491,35 +502,23 @@ const Products = () => {
                             </div>
 
                             <div className="space-y-3">
-                                <div className="flex justify-between items-center">
-                                    <label className="text-sm font-semibold text-slate-700">Technical Specifications</label>
-                                    <button type="button" onClick={addSpecItem} className="text-blue-600 text-sm hover:underline flex items-center gap-1">
-                                        <Plus size={14} /> Add Spec
-                                    </button>
-                                </div>
-                                {formData.specifications.map((spec, idx) => (
-                                    <div key={idx} className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            placeholder="Label (e.g. Volume)"
-                                            required
-                                            value={spec.label}
-                                            onChange={(e) => handleSpecChange(idx, 'label', e.target.value)}
-                                            className="w-1/3 px-4 py-2 border border-slate-200 rounded-lg text-sm"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Value (e.g. 500ml)"
-                                            required
-                                            value={spec.value}
-                                            onChange={(e) => handleSpecChange(idx, 'value', e.target.value)}
-                                            className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm"
-                                        />
-                                        {formData.specifications.length > 1 && (
-                                            <button type="button" onClick={() => removeSpecItem(idx)} className="text-red-500 p-2"><Trash2 size={16} /></button>
-                                        )}
-                                    </div>
-                                ))}
+                                <label className="text-sm font-semibold text-slate-700">Specifications</label>
+                                <ReactQuill
+                                    theme="snow"
+                                    value={formData.specifications || ''}
+                                    onChange={(value) => setFormData(prev => ({ ...prev, specifications: value }))}
+                                    className="h-40 mb-12"
+                                />
+                            </div>
+
+                            <div className="space-y-3">
+                                <label className="text-sm font-semibold text-slate-700">Technical Specifications</label>
+                                <ReactQuill
+                                    theme="snow"
+                                    value={formData.technicalSpecifications || ''}
+                                    onChange={(value) => setFormData(prev => ({ ...prev, technicalSpecifications: value }))}
+                                    className="h-40 mb-12"
+                                />
                             </div>
 
                             <div className="space-y-3">
