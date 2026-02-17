@@ -16,6 +16,7 @@ const Products = () => {
         category: 'protection',
         stock: 0,
         images: [''],
+        shopImages: [''],
         features: [''],
         specifications: '',
         technicalSpecifications: '',
@@ -52,7 +53,7 @@ const Products = () => {
     const handleOpenModal = (product = null) => {
         if (product) {
             setEditingProduct(product);
-            
+
             // Determine initial specifications value
             let initialSpecs = '';
             if (typeof product.specifications === 'string') {
@@ -67,6 +68,7 @@ const Products = () => {
                 category: product.category,
                 stock: product.stock || 0,
                 images: product.images || [''],
+                shopImages: product.shopImages || [''],
                 features: product.features || [''],
                 specifications: initialSpecs,
                 technicalSpecifications: product.technicalSpecifications || '',
@@ -83,6 +85,7 @@ const Products = () => {
                 category: 'protection',
                 stock: 0,
                 images: [''],
+                shopImages: [''],
                 features: [''],
                 specifications: '',
                 technicalSpecifications: '',
@@ -157,7 +160,9 @@ const Products = () => {
         }
     };
 
-    const handleImageUpload = async (e) => {
+
+
+    const handleImageUpload = async (e, field = 'images') => {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
 
@@ -165,14 +170,14 @@ const Products = () => {
         files.forEach(file => uploadFormData.append('images', file));
 
         try {
-            setLoading(true); // Reuse loading state or add a specific one
+            setLoading(true);
             const res = await api.post('/products/upload', uploadFormData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             const newUrls = res.data.urls;
             setFormData(prev => ({
                 ...prev,
-                images: prev.images[0] === '' ? newUrls : [...prev.images, ...newUrls]
+                [field]: prev[field][0] === '' ? newUrls : [...prev[field], ...newUrls]
             }));
         } catch (err) {
             console.error(err);
@@ -421,7 +426,7 @@ const Products = () => {
 
                             <div className="space-y-3">
                                 <div className="flex justify-between items-center">
-                                    <label className="text-sm font-semibold text-slate-700">Product Images</label>
+                                    <label className="text-sm font-semibold text-slate-700">Product Images (General)</label>
                                     <div className="flex gap-4">
                                         <label className="text-blue-600 text-sm hover:underline flex items-center gap-1 cursor-pointer">
                                             <Upload size={14} /> Upload Images
@@ -430,7 +435,7 @@ const Products = () => {
                                                 multiple
                                                 accept="image/*"
                                                 className="hidden"
-                                                onChange={handleImageUpload}
+                                                onChange={(e) => handleImageUpload(e, 'images')}
                                             />
                                         </label>
                                         <button type="button" onClick={() => addArrayItem('images')} className="text-slate-600 text-sm hover:underline flex items-center gap-1">
@@ -462,6 +467,56 @@ const Products = () => {
                                                 placeholder="Image URL"
                                                 value={img}
                                                 onChange={(e) => handleArrayChange(idx, e.target.value, 'images')}
+                                                className="absolute bottom-0 left-0 right-0 px-2 py-1 text-xs bg-white/90 border-t border-slate-200 focus:outline-none"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-sm font-semibold text-slate-700">Shop Images (Specific to Shop Flow)</label>
+                                    <div className="flex gap-4">
+                                        <label className="text-blue-600 text-sm hover:underline flex items-center gap-1 cursor-pointer">
+                                            <Upload size={14} /> Upload Shop Images
+                                            <input
+                                                type="file"
+                                                multiple
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={(e) => handleImageUpload(e, 'shopImages')}
+                                            />
+                                        </label>
+                                        <button type="button" onClick={() => addArrayItem('shopImages')} className="text-slate-600 text-sm hover:underline flex items-center gap-1">
+                                            <Plus size={14} /> Add URL
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {formData.shopImages?.map((img, idx) => (
+                                        <div key={idx} className="relative group aspect-video bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
+                                            {img ? (
+                                                <img src={img} alt="" className="w-full h-full object-contain" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                                    <Package size={24} />
+                                                </div>
+                                            )}
+                                            <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 items-center justify-center">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeArrayItem(idx, 'shopImages')}
+                                                    className="p-2 bg-white text-red-600 rounded-lg hover:bg-red-50 shadow-lg"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                            <input
+                                                type="text"
+                                                placeholder="Shop Image URL"
+                                                value={img}
+                                                onChange={(e) => handleArrayChange(idx, e.target.value, 'shopImages')}
                                                 className="absolute bottom-0 left-0 right-0 px-2 py-1 text-xs bg-white/90 border-t border-slate-200 focus:outline-none"
                                             />
                                         </div>
