@@ -8,6 +8,7 @@ const Users = () => {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [productGroups, setProductGroups] = useState([]);
     const [submitting, setSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
@@ -17,12 +18,23 @@ const Users = () => {
         password: '',
         phoneNumber: '',
         companyName: '',
-        country: ''
+        country: '',
+        productGroup: ''
     });
 
     useEffect(() => {
         fetchUsers();
+        fetchProductGroups();
     }, []);
+
+    const fetchProductGroups = async () => {
+        try {
+            const res = await api.get('/product-groups');
+            setProductGroups(res.data);
+        } catch (err) {
+            console.error('Failed to fetch product groups:', err);
+        }
+    };
 
     const fetchUsers = async () => {
         try {
@@ -82,7 +94,8 @@ const Users = () => {
                 password: '',
                 phoneNumber: '',
                 companyName: '',
-                country: ''
+                country: '',
+                productGroup: ''
             });
             fetchUsers();
         } catch (err) {
@@ -137,6 +150,7 @@ const Users = () => {
                             <tr>
                                 <th className="px-6 py-4 font-semibold">User</th>
                                 <th className="px-6 py-4 font-semibold">Role</th>
+                                <th className="px-6 py-4 font-semibold">Pricing Group</th>
                                 <th className="px-6 py-4 font-semibold">Country</th>
                                 <th className="px-6 py-4 font-semibold">Status</th>
                                 <th className="px-6 py-4 font-semibold text-right">Actions</th>
@@ -167,6 +181,22 @@ const Users = () => {
                                             }`}>
                                             {user.role}
                                         </span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {user.productGroup ? (
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-bold text-slate-700">
+                                                    {typeof user.productGroup === 'object' ? user.productGroup.name :
+                                                        productGroups.find(g => g._id === user.productGroup)?.name || 'Linked'}
+                                                </span>
+                                                <span className="text-[10px] text-slate-400 uppercase tracking-wider">
+                                                    {typeof user.productGroup === 'object' ? user.productGroup.currency :
+                                                        productGroups.find(g => g._id === user.productGroup)?.currency}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <span className="text-sm text-slate-300 italic">No Group</span>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 text-slate-600 font-medium">{user.country || '-'}</td>
                                     <td className="px-6 py-4">
@@ -318,16 +348,6 @@ const Users = () => {
 
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-slate-700">Company Name</label>
-                                    <input
-                                        type="text"
-                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                        placeholder="Acme Corp"
-                                        value={formData.companyName}
-                                        onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
                                     <label className="text-sm font-semibold text-slate-700">Country</label>
                                     <input
                                         type="text"
@@ -336,6 +356,21 @@ const Users = () => {
                                         value={formData.country}
                                         onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                                     />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-slate-700">Product Pricing Group</label>
+                                    <select
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none"
+                                        value={formData.productGroup}
+                                        onChange={(e) => setFormData({ ...formData, productGroup: e.target.value })}
+                                    >
+                                        <option value="">None (Standard Pricing)</option>
+                                        {productGroups.map(group => (
+                                            <option key={group._id} value={group._id}>
+                                                {group.name} ({group.currency})
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
 

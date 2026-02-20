@@ -203,7 +203,11 @@ const ProductGroups = () => {
                         <div className="p-6 flex justify-between items-center bg-slate-50/50">
                             <div>
                                 <h3 className="text-lg font-bold text-slate-900">{group.name}</h3>
-                                <p className="text-sm text-slate-500">{group.products.length} Products</p>
+                                <div className="flex gap-2 text-sm text-slate-500">
+                                    <span>{group.products.length} Products</span>
+                                    <span>•</span>
+                                    <span className="text-blue-600 font-medium">{group.userCount || 0} Users</span>
+                                </div>
                             </div>
                             <div className="flex gap-2">
                                 <button onClick={() => handleOpenModal(group)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
