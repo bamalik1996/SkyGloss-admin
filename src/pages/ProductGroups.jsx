@@ -14,14 +14,56 @@ const ProductGroups = () => {
     const [searchProduct, setSearchProduct] = useState('');
 
     const currencies = [
-        { code: 'USD', symbol: '$' },
-        { code: 'EUR', symbol: '€' },
-        { code: 'GBP', symbol: '£' },
-        { code: 'CAD', symbol: 'CA$' },
-        { code: 'AUD', symbol: 'A$' },
-        { code: 'AED', symbol: 'AED' },
-        { code: 'PKR', symbol: 'Rs.' }
-    ];
+        { code: 'USD', symbol: '$', name: 'US Dollar' },
+        { code: 'EUR', symbol: '€', name: 'Euro' },
+        { code: 'GBP', symbol: '£', name: 'British Pound' },
+        { code: 'CAD', symbol: 'CA$', name: 'Canadian Dollar' },
+        { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+        { code: 'AED', symbol: 'AED', name: 'UAE Dirham' },
+        { code: 'PKR', symbol: 'Rs.', name: 'Pakistani Rupee' },
+        { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
+        { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+        { code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
+        { code: 'SAR', symbol: 'SR', name: 'Saudi Riyal' },
+        { code: 'QAR', symbol: 'QR', name: 'Qatari Rial' },
+        { code: 'KWD', symbol: 'KD', name: 'Kuwaiti Dinar' },
+        { code: 'BHD', symbol: 'BD', name: 'Bahraini Dinar' },
+        { code: 'OMR', symbol: 'OR', name: 'Omani Rial' },
+        { code: 'TRY', symbol: '₺', name: 'Turkish Lira' },
+        { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
+        { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar' },
+        { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar' },
+        { code: 'HKD', symbol: 'HK$', name: 'Hong Kong Dollar' },
+        { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
+        { code: 'SEK', symbol: 'kr', name: 'Swedish Krona' },
+        { code: 'NOK', symbol: 'kr', name: 'Norwegian Krone' },
+        { code: 'DKK', symbol: 'kr', name: 'Danish Krone' },
+        { code: 'RUB', symbol: '₽', name: 'Russian Ruble' },
+        { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
+        { code: 'MXN', symbol: 'Mex$', name: 'Mexican Peso' },
+        { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah' },
+        { code: 'MYR', symbol: 'RM', name: 'Malaysian Ringgit' },
+        { code: 'PHP', symbol: '₱', name: 'Philippine Peso' },
+        { code: 'THB', symbol: '฿', name: 'Thai Baht' },
+        { code: 'VND', symbol: '₫', name: 'Vietnamese Dong' },
+        { code: 'EGP', symbol: 'E£', name: 'Egyptian Pound' },
+        { code: 'NGN', symbol: '₦', name: 'Nigerian Naira' },
+        { code: 'KES', symbol: 'KSh', name: 'Kenyan Shilling' },
+        { code: 'GHS', symbol: 'GH₵', name: 'Ghanaian Cedi' },
+        { code: 'MAD', symbol: 'DH', name: 'Moroccan Dirham' },
+        { code: 'KZT', symbol: '₸', name: 'Kazakhstani Tenge' },
+        { code: 'UAH', symbol: '₴', name: 'Ukrainian Hryvnia' },
+        { code: 'PLN', symbol: 'zł', name: 'Polish Zloty' },
+        { code: 'CZK', symbol: 'Kč', name: 'Czech Koruna' },
+        { code: 'HUF', symbol: 'Ft', name: 'Hungarian Forint' },
+        { code: 'ILS', symbol: '₪', name: 'Israeli New Shekel' },
+        { code: 'CLP', symbol: 'CLP$', name: 'Chilean Peso' },
+        { code: 'COP', symbol: 'COL$', name: 'Colombian Peso' },
+        { code: 'ARS', symbol: 'ARS$', name: 'Argentine Peso' },
+        { code: 'PEN', symbol: 'S/', name: 'Peruvian Sol' },
+        { code: 'BDT', symbol: '৳', name: 'Bangladeshi Taka' },
+        { code: 'LKR', symbol: 'Rs', name: 'Sri Lankan Rupee' },
+    ].sort((a, b) => a.code.localeCompare(b.code));
 
     const getSymbol = (code) => currencies.find(c => c.code === code)?.symbol || '$';
 
@@ -223,7 +265,7 @@ const ProductGroups = () => {
                                         onChange={(e) => setCurrency(e.target.value)}
                                     >
                                         {currencies.map(c => (
-                                            <option key={c.code} value={c.code}>{c.code} ({c.symbol})</option>
+                                            <option key={c.code} value={c.code}>{c.code} - {c.name} ({c.symbol})</option>
                                         ))}
                                     </select>
                                 </div>
