@@ -16,7 +16,7 @@ const Users = () => {
         email: '',
         firstName: '',
         lastName: '',
-        role: 'distributor',
+        role: 'master_distributor',
         password: '',
         phoneNumber: '',
         companyName: '',
