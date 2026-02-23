@@ -66,7 +66,7 @@ const Layout = ({ children }) => {
                         {isSidebarOpen && (
                             <div className="overflow-hidden">
                                 <p className="text-sm font-semibold truncate">{user?.firstName} {user?.lastName}</p>
-                                <p className="text-xs text-slate-500 truncate capitalize">{user?.role}</p>
+                                <p className="text-xs text-slate-500 truncate capitalize">{user?.role?.replace(/_/g, ' ')}</p>
                             </div>
                         )}
                     </div>

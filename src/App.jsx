@@ -31,7 +31,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
-          <Route element={<ProtectedRoute allowedRoles={['admin', 'distributor']} />}>
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'master_distributor', 'regional_distributor']} />}>
             <Route element={<Layout children={<Dashboard />} />} path="/" />
             <Route element={<Layout children={<Users />} />} path="/users" />
             <Route element={<Layout children={<AccessCodes />} />} path="/access-codes" />

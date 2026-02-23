@@ -88,7 +88,7 @@ const Users = () => {
             email: user.email || '',
             firstName: user.firstName || '',
             lastName: user.lastName || '',
-            role: user.role || 'distributor',
+            role: user.role || 'master_distributor',
             password: '', // Leave blank for edit
             phoneNumber: user.phoneNumber || '',
             companyName: user.companyName || '',
@@ -105,7 +105,7 @@ const Users = () => {
             email: '',
             firstName: '',
             lastName: '',
-            role: 'distributor',
+            role: 'certified_shop',
             password: '',
             phoneNumber: '',
             companyName: '',
@@ -209,11 +209,12 @@ const Users = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${user.role === 'admin' ? 'bg-purple-100 text-purple-700' :
-                                            user.role === 'distributor' ? 'bg-blue-100 text-blue-700' :
-                                                user.role === 'shop' ? 'bg-emerald-100 text-emerald-700' :
-                                                    'bg-orange-100 text-orange-700'
+                                            user.role === 'master_distributor' ? 'bg-indigo-100 text-indigo-700' :
+                                                user.role === 'regional_distributor' ? 'bg-blue-100 text-blue-700' :
+                                                    user.role === 'certified_shop' ? 'bg-emerald-100 text-emerald-700' :
+                                                        'bg-slate-100 text-slate-700'
                                             }`}>
-                                            {user.role}
+                                            {user.role?.replace(/_/g, ' ')}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
@@ -369,8 +370,9 @@ const Users = () => {
                                         value={formData.role}
                                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                                     >
-                                        <option value="distributor">Distributor</option>
-                                        <option value="shop">Shop</option>
+                                        <option value="master_distributor">Master Distributor</option>
+                                        <option value="regional_distributor">Regional Distributor</option>
+                                        <option value="certified_shop">Certified Shop</option>
                                         <option value="admin">Administrator</option>
                                     </select>
                                 </div>
