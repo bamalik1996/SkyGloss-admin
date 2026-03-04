@@ -128,12 +128,12 @@ const Users = () => {
     };
 
     const handleGeocode = async () => {
-        if (!formData.city || !formData.country) {
-            toast.error('Please enter city and country first');
+        if (!formData.address || !formData.city || !formData.country) {
+            toast.error('Please enter address, city and country first');
             return;
         }
         try {
-            const query = `${formData.city}, ${formData.country}`;
+            const query = `${formData.address}, ${formData.city}, ${formData.country}`;
             const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
             const data = await res.json();
             if (data && data[0]) {
@@ -151,9 +151,9 @@ const Users = () => {
         }
     };
 
-    const fetchCoordinates = async (city, country) => {
+    const fetchCoordinates = async (address, city, country) => {
         try {
-            const query = `${city}, ${country}`;
+            const query = `${address}, ${city}, ${country}`;
             const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
             const data = await res.json();
             if (data && data[0]) {
@@ -175,8 +175,8 @@ const Users = () => {
         // Auto-geocode if coordinates are missing
         let finalFormData = { ...formData };
         if (!finalFormData.latitude || !finalFormData.longitude) {
-            if (finalFormData.city && finalFormData.country) {
-                const coords = await fetchCoordinates(finalFormData.city, finalFormData.country);
+            if (finalFormData.address && finalFormData.city && finalFormData.country) {
+                const coords = await fetchCoordinates(finalFormData.address, finalFormData.city, finalFormData.country);
                 if (coords) {
                     finalFormData = { ...finalFormData, ...coords };
                     setFormData(finalFormData); // Update UI state too
@@ -498,8 +498,8 @@ const Users = () => {
                                         value={formData.country}
                                         onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                                         onBlur={async () => {
-                                            if (formData.city && formData.country && (formData.latitude === '' || formData.latitude === null || formData.latitude === undefined)) {
-                                                const coords = await fetchCoordinates(formData.city, formData.country);
+                                            if (formData.address && formData.city && formData.country && (formData.latitude === '' || formData.latitude === null || formData.latitude === undefined)) {
+                                                const coords = await fetchCoordinates(formData.address, formData.city, formData.country);
                                                 if (coords) setFormData(prev => ({ ...prev, ...coords }));
                                             }
                                         }}
@@ -514,8 +514,8 @@ const Users = () => {
                                         value={formData.city}
                                         onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                                         onBlur={async () => {
-                                            if (formData.city && formData.country && (formData.latitude === '' || formData.latitude === null || formData.latitude === undefined)) {
-                                                const coords = await fetchCoordinates(formData.city, formData.country);
+                                            if (formData.address && formData.city && formData.country && (formData.latitude === '' || formData.latitude === null || formData.latitude === undefined)) {
+                                                const coords = await fetchCoordinates(formData.address, formData.city, formData.country);
                                                 if (coords) setFormData(prev => ({ ...prev, ...coords }));
                                             }
                                         }}
@@ -567,6 +567,12 @@ const Users = () => {
                                         placeholder="Enter full address"
                                         value={formData.address}
                                         onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                        onBlur={async () => {
+                                            if (formData.address && formData.city && formData.country && (formData.latitude === '' || formData.latitude === null || formData.latitude === undefined)) {
+                                                const coords = await fetchCoordinates(formData.address, formData.city, formData.country);
+                                                if (coords) setFormData(prev => ({ ...prev, ...coords }));
+                                            }
+                                        }}
                                     />
                                 </div>
 
