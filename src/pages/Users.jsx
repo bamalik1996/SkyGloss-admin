@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import api from '../api/axios';
+import { Country, City } from 'country-state-city';
 import { Search, Filter, MoreVertical, Trash2, Ban, CheckCircle, X, Loader2, Edit, Trophy } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -12,6 +13,8 @@ const Users = () => {
     const [submitting, setSubmitting] = useState(false);
     const [editingUserId, setEditingUserId] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
+    const countries = useMemo(() => Country.getAllCountries(), []);
+    const [cities, setCities] = useState([]);
     const [formData, setFormData] = useState({
         email: '',
         firstName: '',
@@ -103,6 +106,14 @@ const Users = () => {
             latitude: user.latitude ?? '',
             longitude: user.longitude ?? ''
         });
+
+        // Load cities for the selected country
+        const countryObj = countries.find(c => c.name === user.country);
+        if (countryObj) {
+            setCities(City.getCitiesOfCountry(countryObj.isoCode));
+        } else {
+            setCities([]);
+        }
         setIsAddModalOpen(true);
     };
 
@@ -124,6 +135,7 @@ const Users = () => {
             latitude: '',
             longitude: ''
         });
+        setCities([]);
         setIsAddModalOpen(true);
     };
 
@@ -490,36 +502,55 @@ const Users = () => {
 
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-slate-700">Country</label>
-                                    <input
-                                        type="text"
-                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                        placeholder="USA"
+                                    <label className="text-sm font-semibold text-slate-700">Country <span className="text-red-500">*</span></label>
+                                    <select
+                                        required
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none"
                                         value={formData.country}
-                                        onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                                        onBlur={async () => {
-                                            if (formData.address && formData.city && formData.country && (formData.latitude === '' || formData.latitude === null || formData.latitude === undefined)) {
-                                                const coords = await fetchCoordinates(formData.address, formData.city, formData.country);
-                                                if (coords) setFormData(prev => ({ ...prev, ...coords }));
+                                        onChange={(e) => {
+                                            const countryName = e.target.value;
+                                            const countryObj = countries.find(c => c.name === countryName);
+                                            setFormData({ ...formData, country: countryName, city: '' });
+                                            if (countryObj) {
+                                                setCities(City.getCitiesOfCountry(countryObj.isoCode));
+                                            } else {
+                                                setCities([]);
                                             }
                                         }}
-                                    />
+                                    >
+                                        <option value="">Select Country</option>
+                                        {countries.map(country => (
+                                            <option key={country.isoCode} value={country.name}>
+                                                {country.name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-slate-700">City</label>
-                                    <input
-                                        type="text"
-                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                        placeholder="Enter city"
+                                    <label className="text-sm font-semibold text-slate-700">City <span className="text-red-500">*</span></label>
+                                    <select
+                                        required
+                                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none"
                                         value={formData.city}
-                                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                                        onBlur={async () => {
-                                            if (formData.address && formData.city && formData.country && (formData.latitude === '' || formData.latitude === null || formData.latitude === undefined)) {
-                                                const coords = await fetchCoordinates(formData.address, formData.city, formData.country);
-                                                if (coords) setFormData(prev => ({ ...prev, ...coords }));
+                                        onChange={async (e) => {
+                                            const cityName = e.target.value;
+                                            setFormData(prev => ({ ...prev, city: cityName }));
+                                            if (cityName && formData.country) {
+                                                const coords = await fetchCoordinates(formData.address || '', cityName, formData.country);
+                                                if (coords) {
+                                                    setFormData(prev => ({ ...prev, ...coords, city: cityName }));
+                                                }
                                             }
                                         }}
-                                    />
+                                        disabled={!formData.country}
+                                    >
+                                        <option value="">{formData.country ? 'Select City' : 'Select Country First'}</option>
+                                        {cities.map(city => (
+                                            <option key={city.name + city.latitude} value={city.name}>
+                                                {city.name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
 
@@ -546,13 +577,13 @@ const Users = () => {
                                             value={formData.longitude}
                                             onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
                                         />
-                                        <button
+                                        {/* <button
                                             type="button"
                                             onClick={handleGeocode}
                                             className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-blue-100 text-blue-600 rounded text-xs font-bold hover:bg-blue-200 transition-colors"
                                         >
                                             Get Coords
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </div>
                             </div>
@@ -560,9 +591,10 @@ const Users = () => {
                             <div className="grid grid-cols-2 gap-6">
 
                                 <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-slate-700">Address</label>
+                                    <label className="text-sm font-semibold text-slate-700">Address <span className="text-red-500">*</span></label>
                                     <input
                                         type="text"
+                                        required
                                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                         placeholder="Enter full address"
                                         value={formData.address}
