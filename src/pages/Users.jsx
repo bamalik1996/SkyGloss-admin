@@ -1,8 +1,17 @@
 import { useState, useEffect, useMemo } from 'react';
 import api from '../api/axios';
-import { Country, City } from 'country-state-city';
+import { Country, State, City } from 'country-state-city';
 import { Search, Filter, MoreVertical, Trash2, Ban, CheckCircle, X, Loader2, Edit, Trophy } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+
+const normalizeName = (name) => {
+    if (!name) return '';
+    return name
+        .normalize('NFD') // Separate characters from diacritics
+        .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+        .replace(/ı/g, 'i') // Special handling for Turkish dotless i
+        .replace(/İ/g, 'I'); // Special handling for Turkish dotted I
+};
 
 const Users = () => {
     const [users, setUsers] = useState([]);
@@ -107,10 +116,24 @@ const Users = () => {
             longitude: user.longitude ?? ''
         });
 
-        // Load cities for the selected country
+        // Load cities and states for the selected country
         const countryObj = countries.find(c => c.name === user.country);
         if (countryObj) {
-            setCities(City.getCitiesOfCountry(countryObj.isoCode));
+            const rawCities = City.getCitiesOfCountry(countryObj.isoCode) || [];
+            const rawStates = State.getStatesOfCountry(countryObj.isoCode) || [];
+
+            // Combine, normalize, and de-duplicate
+            const combined = [...rawCities, ...rawStates]
+                .map(item => ({
+                    ...item,
+                    name: normalizeName(item.name)
+                }))
+                .filter((item, index, self) =>
+                    index === self.findIndex((t) => t.name === item.name)
+                )
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            setCities(combined);
         } else {
             setCities([]);
         }
@@ -164,20 +187,35 @@ const Users = () => {
     };
 
     const fetchCoordinates = async (address, city, country) => {
-        try {
-            const query = `${address}, ${city}, ${country}`;
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
-            const data = await res.json();
-            if (data && data[0]) {
-                return {
-                    latitude: parseFloat(data[0].lat),
-                    longitude: parseFloat(data[0].lon)
-                };
+        const fetchWithQuery = async (query) => {
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`, {
+                    headers: {
+                        'User-Agent': 'SkyGloss-Admin-Panel'
+                    }
+                });
+                const data = await res.json();
+                if (data && data[0]) {
+                    return {
+                        latitude: parseFloat(data[0].lat),
+                        longitude: parseFloat(data[0].lon)
+                    };
+                }
+            } catch (err) {
+                console.error(`Geocoding failed for query "${query}":`, err);
             }
-        } catch (err) {
-            console.error('Auto-geocoding failed:', err);
+            return null;
+        };
+
+        // Try 1: Full Address
+        let coords = await fetchWithQuery(`${address}, ${city}, ${country}`);
+
+        // Try 2: City and Country fallback (if address search fails)
+        if (!coords && (city || country)) {
+            coords = await fetchWithQuery(`${city}, ${country}`);
         }
-        return null;
+
+        return coords;
     };
 
     const handleSubmit = async (e) => {
@@ -512,7 +550,20 @@ const Users = () => {
                                             const countryObj = countries.find(c => c.name === countryName);
                                             setFormData({ ...formData, country: countryName, city: '' });
                                             if (countryObj) {
-                                                setCities(City.getCitiesOfCountry(countryObj.isoCode));
+                                                const rawCities = City.getCitiesOfCountry(countryObj.isoCode) || [];
+                                                const rawStates = State.getStatesOfCountry(countryObj.isoCode) || [];
+
+                                                const combined = [...rawCities, ...rawStates]
+                                                    .map(item => ({
+                                                        ...item,
+                                                        name: normalizeName(item.name)
+                                                    }))
+                                                    .filter((item, index, self) =>
+                                                        index === self.findIndex((t) => t.name === item.name)
+                                                    )
+                                                    .sort((a, b) => a.name.localeCompare(b.name));
+
+                                                setCities(combined);
                                             } else {
                                                 setCities([]);
                                             }
@@ -545,8 +596,8 @@ const Users = () => {
                                         disabled={!formData.country}
                                     >
                                         <option value="">{formData.country ? 'Select City' : 'Select Country First'}</option>
-                                        {cities.map(city => (
-                                            <option key={city.name + city.latitude} value={city.name}>
+                                        {cities.map((city, index) => (
+                                            <option key={`${city.name}-${index}`} value={city.name}>
                                                 {city.name}
                                             </option>
                                         ))}
@@ -554,7 +605,7 @@ const Users = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-6 items-end">
+                            <div className="grid grid-cols-2 gap-6 items-end " style={{ "margin-bottom": "20px", "position": "absolute", "z-index": "-99999", "opacity": "0" }}>
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-slate-700">Latitude</label>
                                     <input
