@@ -349,6 +349,7 @@ const Users = () => {
                                 <th className="px-6 py-4 font-semibold" style={{ minWidth: "200px" }}>City</th>
                                 <th className="px-6 py-4 font-semibold" style={{ minWidth: "200px" }}>Country</th>
                                 <th className="px-6 py-4 font-semibold" style={{ minWidth: "150px" }}>Lat/Lng</th>
+                                <th className="px-6 py-4 font-semibold" style={{ minWidth: "150px" }}>Payment</th>
                                 <th className="px-6 py-4 font-semibold" style={{ minWidth: "200px" }}>Status</th>
                                 <th className="px-6 py-4 font-semibold text-right" style={{ minWidth: "200px" }}>Actions</th>
                             </tr>
@@ -427,6 +428,19 @@ const Users = () => {
                                         {(user.latitude !== undefined && user.latitude !== null && user.longitude !== undefined && user.longitude !== null) ? (
                                             <span className="text-slate-600 font-medium">{user.latitude.toFixed(2)}, {user.longitude.toFixed(2)}</span>
                                         ) : 'None'}
+                                    </td>
+                                    <td className="px-6 py-4 text-sm">
+                                        {user.role === 'regional_distributor' ? (
+                                            !user.isSelfRegistered ? (
+                                                <span className="px-2 py-1 bg-slate-100 text-slate-500 rounded text-[10px] font-bold uppercase tracking-wider">Admin Created</span>
+                                            ) : (
+                                                <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${user.isDistributorPaid ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+                                                    {user.isDistributorPaid ? 'Paid' : 'Unpaid'}
+                                                </span>
+                                            )
+                                        ) : (
+                                            <span className="text-slate-300">-</span>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`flex items-center gap-1.5 text-sm font-medium ${user.status === 'active' ? 'text-emerald-600' :
