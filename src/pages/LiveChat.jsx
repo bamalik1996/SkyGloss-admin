@@ -191,11 +191,15 @@ const LiveChat = () => {
                                             ? 'bg-blue-600 text-white rounded-tr-none shadow-md'
                                             : 'bg-white text-slate-800 rounded-tl-none shadow-sm border border-slate-100'
                                             }`}>
+                                            <div className="text-[10px] opacity-70 mb-1">
+                                                {msg.senderName}
+                                            </div>
                                             {msg.message}
                                         </div>
                                         <p className={`text-[10px] mt-1 text-slate-400 ${msg.senderType === 'admin' ? 'text-right' : 'text-left'}`}>
                                             {msg.createdAt ? format(new Date(msg.createdAt), 'HH:mm') : ''}
                                         </p>
+
                                     </div>
                                 </div>
                             ))}
