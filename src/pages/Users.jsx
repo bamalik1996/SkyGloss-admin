@@ -366,7 +366,7 @@ const Users = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        {user.partnerCode ? (
+                                        {(['master_partner', 'regional_partner', 'partner'].includes(user.role) && user.partnerCode) ? (
                                             <span className="font-mono text-sm font-bold text-[#0EA0DC] bg-[#0EA0DC]/5 px-2 py-1 rounded">
                                                 {user.partnerCode}
                                             </span>
