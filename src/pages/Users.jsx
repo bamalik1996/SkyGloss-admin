@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import api from '../api/axios';
 import { Country, State, City } from 'country-state-city';
-import { Search, Filter, MoreVertical, Trash2, Ban, CheckCircle, X, Loader2, Edit, Trophy, Video } from 'lucide-react';
+import { Search, Filter, MoreVertical, Trash2, Ban, CheckCircle, X, Loader2, Edit, Trophy, Video, Globe, Facebook, Instagram, Youtube, Linkedin, Info } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const normalizeName = (name) => {
@@ -63,7 +63,15 @@ const Users = () => {
         city: '',
         latitude: '',
         longitude: '',
-        partnerCode: ''
+        partnerCode: '',
+        isPartnerPaid: false,
+        website: '',
+        facebook: '',
+        instagram: '',
+        youtube: '',
+        tiktok: '',
+        linkedin: '',
+        hearAboutUs: ''
     });
 
     useEffect(() => {
@@ -134,7 +142,15 @@ const Users = () => {
             city: user.city || '',
             latitude: user.latitude ?? '',
             longitude: user.longitude ?? '',
-            partnerCode: user.partnerCode || ''
+            partnerCode: user.partnerCode || '',
+            isPartnerPaid: user.isPartnerPaid || false,
+            website: user.website || '',
+            facebook: user.facebook || '',
+            instagram: user.instagram || '',
+            youtube: user.youtube || '',
+            tiktok: user.tiktok || '',
+            linkedin: user.linkedin || '',
+            hearAboutUs: user.hearAboutUs || ''
         });
 
         // Load cities and states for the selected country
@@ -178,7 +194,15 @@ const Users = () => {
             city: '',
             latitude: '',
             longitude: '',
-            partnerCode: ''
+            partnerCode: '',
+            isPartnerPaid: false,
+            website: '',
+            facebook: '',
+            instagram: '',
+            youtube: '',
+            tiktok: '',
+            linkedin: '',
+            hearAboutUs: ''
         });
         setCities([]);
         setIsAddModalOpen(true);
@@ -275,9 +299,18 @@ const Users = () => {
                 const payload = { ...finalFormData };
                 if (!payload.password) delete payload.password;
 
+                // Sync status if paid
+                if (payload.isPartnerPaid) {
+                    payload.status = 'active';
+                }
+
                 await api.patch(`/users/${editingUserId}`, payload);
                 toast.success('User updated successfully');
             } else {
+                // Sync status if paid
+                if (finalFormData.isPartnerPaid) {
+                    finalFormData.status = 'active';
+                }
                 await api.post('/users', finalFormData);
                 toast.success('User created successfully');
             }
@@ -761,7 +794,113 @@ const Users = () => {
 
                             </div>
 
-                            <div className="flex gap-4 pt-4">
+                            {/* Payment & Status Section */}
+                            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <label className="text-sm font-semibold text-slate-700">Payment Status</label>
+                                        <div className="group relative">
+                                            <Info size={14} className="text-slate-400" />
+                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                                                Manually marking a user as PAID will also set their status to ACTIVE.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            className="sr-only peer"
+                                            checked={formData.isPartnerPaid}
+                                            onChange={(e) => setFormData({ ...formData, isPartnerPaid: e.target.checked })}
+                                        />
+                                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                        <span className={`ml-3 text-xs font-bold uppercase transition-colors ${formData.isPartnerPaid ? 'text-emerald-600' : 'text-slate-400'}`}>
+                                            {formData.isPartnerPaid ? 'Paid' : 'Unpaid'}
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {/* Online Presence & Socials */}
+                            <div className="space-y-4 pt-4 border-t border-slate-100">
+                                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Online Presence</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                                            <Globe size={14} /> Website
+                                        </label>
+                                        <input
+                                            type="url"
+                                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                            placeholder="https://..."
+                                            value={formData.website}
+                                            onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                                            <Facebook size={14} /> Facebook
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                            placeholder="Profile URL / Username"
+                                            value={formData.facebook}
+                                            onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                                            <Instagram size={14} /> Instagram
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                            placeholder="@username"
+                                            value={formData.instagram}
+                                            onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                                            <Youtube size={14} /> YouTube
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                            placeholder="Channel URL"
+                                            value={formData.youtube}
+                                            onChange={(e) => setFormData({ ...formData, youtube: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                                            <Linkedin size={14} /> LinkedIn
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                            placeholder="LinkedIn URL"
+                                            value={formData.linkedin}
+                                            onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                                            <Video size={14} /> TikTok
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                            placeholder="@tiktok_handle"
+                                            value={formData.tiktok}
+                                            onChange={(e) => setFormData({ ...formData, tiktok: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-4 pt-4 border-t border-slate-100">
                                 <button
                                     type="button"
                                     onClick={() => setIsAddModalOpen(false)}
