@@ -33,7 +33,7 @@ const Login = () => {
                 <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-2xl">
                     <div className="text-center mb-8">
                         <h1 className="text-3xl font-bold text-white mb-2">Admin Portal</h1>
-                        <p className="text-slate-400">Sign in to manage your platform</p>
+                        <p className="text-slate-400">-Sign in to manage your platform-</p>
                     </div>
 
                     {error && (
